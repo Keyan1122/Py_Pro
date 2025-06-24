@@ -31,9 +31,10 @@ def draw_results(frame, results, frame_id=0, csv_writer=None):
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
             # Label each face with ID and attributes
-            label = f"Face #{i+1}: {gender}, {age}, {emotion}"
-            cv2.putText(frame, label, (x, y - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            # label = f"Face #{i+1}: {gender}, {age}, {emotion}"
+            cv2.putText(frame, f'Gender: {gender}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+            cv2.putText(frame, f'Age: {age}', (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+            cv2.putText(frame, f'Emotion: {emotion}', (x, y + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
 
             # Log to CSV if writer is provided
             if csv_writer:

@@ -12,8 +12,16 @@ root.configure(bg='#1e1e1e')
 label = tk.Label(root, text='Face Analyser GUI', font=('Helvetica', 18), bg='#1e1e1e', fg='white')
 label.pack(pady=20)
 
+# Frame to hold thumbnails
+thumb_frame = tk.Frame(root, bg="#1e1e1e")
+thumb_frame.pack(pady=10)
+
 # Funtion to handle image button
 def run_image():
+    # Clear previous thumbnails
+    for widget in thumb_frame.winfo_children():
+        widget.destroy()
+
     filepath = filedialog.askopenfilename(filetypes=[('Image File', '*.jpg *.jpeg *.png')])
     if filepath:
         analyse_image(filepath)
