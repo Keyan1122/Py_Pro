@@ -1,43 +1,51 @@
 import cv2
 from deepface import DeepFace
 
-# Analyze a single frame using DeepFace
+# Analyze a frame and detect all faces with age, gender, emotion
 def analyse_frame(frame):
     try:
-        # Analyse the frame for age, gender, emotion
-        result = DeepFace.analyze(frame, actions=['age', 'gender', 'emotion'], enforce_detection=False)
-
-        if not isinstance(result, list):
-            result = [result]
-
-        return result
-
+        results = DeepFace.analyze(
+            frame,
+            actions=['age', 'gender', 'emotion'],
+            enforce_detection=False
+        )
+        if not isinstance(results, list):
+            results = [results]  # Normalize single face to list
+        return results
     except Exception as e:
-        print('Analysis Error: ', e)
+        print("Analysis error:", e)
         return []
 
-# Draw bounding box and labels (age, gender, emotion) on the frame
-def draw_results(frame, results):
-    if results is None:
-        return frame # return origial frame if no result
-    
-    for result in results:
+# Draw results for all faces and optionally write to CSV
+def draw_results(frame, results, frame_id=0, csv_writer=None):
+    for i, result in enumerate(results):
         try:
-            # Exact details
+            # Extract values
             age = result['age']
             gender = result['dominant_gender']
             emotion = result['dominant_emotion']
-            box = result['region'] # Face bounding box
-
-            # Draw rectangle around the face
+            box = result['region']
             x, y, w, h = box['x'], box['y'], box['w'], box['h']
+
+            # Draw bounding box
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-            # Prepare the text label
-            cv2.putText(frame, f'Gender: {gender}', (x, y + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255))
-            cv2.putText(frame, f'Age: {age}', (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255))
-            cv2.putText(frame, f'Emotion: {emotion}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255))
-        except Exception as e:
-            print('Drawing error:', e)
+            # Label each face with ID and attributes
+            label = f"Face #{i+1}: {gender}, {age}, {emotion}"
+            cv2.putText(frame, label, (x, y - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
-    return frame # return modified frame with anotations
+            # Log to CSV if writer is provided
+            if csv_writer:
+                csv_writer.writerow({
+                    'frame': frame_id,
+                    'face_id': i + 1,
+                    'age': age,
+                    'gender': gender,
+                    'emotion': emotion
+                })
+
+        except Exception as e:
+            print("Drawing error:", e)
+
+    return frame
